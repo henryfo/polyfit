@@ -41,7 +41,7 @@ typedef struct matrix_s
 } matrix_t;
 
 // MACRO to access a value with a matrix.
-#define MATRIX_VALUE_PTR( pContents, row, col )  (&(pContents[ (row * pContents.cols) + col]))
+#define MATRIX_VALUE_PTR( pA, row, col )  (&(((pA)->pContents)[ (row * (pA)->cols) + col]))
 
 
 //------------------------------------------------
@@ -54,11 +54,11 @@ typedef struct matrix_s
 // of input points.
 //
 // The degree of the fitted polynomial is one less than
-// the count of elements in the polynomial vector.
+// the count of coefficients in the coefficients array.
 //
 // Returns 0 if success.
 //--------------------------------------------------------
-int poly( pointlist_t inputData, vector_t polyCoefficients );
+int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] );
 
 
 #endif	// MLS_H
