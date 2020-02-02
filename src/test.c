@@ -47,8 +47,24 @@ int numPoints13 = (int) (sizeof(m_pts13) / sizeof(m_pts13[0]));
 double coeff13[] = {0, 0, 0};
 int numCoeffs13 = (int) (sizeof(coeff13) / sizeof(coeff13[0]));
 
+// test MLS regeression example from https://www.mathsisfun.com/data/least-squares-regression.html
+point_t m_pts14[] =
+{
+  {2,4},
+  {3,5},
+  {5,7},
+  {7,10}, 
+  {9,15}
+};
+int numPoints14 = (int) (sizeof(m_pts14) / sizeof(m_pts14[0]));
+double coeff14[] = {0, 0};
+int numCoeffs14 = (int) (sizeof(coeff14) / sizeof(coeff14[0]));
 
 
+//--------------------------------------------------------
+// main()
+// Unit tests the poly() function.
+//--------------------------------------------------------
 int main()
 {
   // printf("Hello world test stub.\n" );
@@ -81,11 +97,23 @@ int main()
   {
     printf( "Test unlucky 13 polynomial = ");
     showPoly( numCoeffs13, &coeff13[0] );
-    printf("Test 13polynomial should fail since we are fitting a parabola to only two unique points.\n");
+    printf("Test 13 polynomial should fail since we are fitting a parabola to only two unique points.\n");
   }
   else
   {
     printf( "Expected error in test 13 is OK: poly returned %d.\n", result );
+  }
+  
+  result = poly( numPoints14, &m_pts14[0], numCoeffs14, &coeff14[0]);
+  if( 0 == result)
+  {
+    printf( "Test 14 polynomial = ");
+    showPoly( numCoeffs14, &coeff14[0] );
+    printf("Test 14 polynomial should be equivalent to 0.305 + (1.518 * x).\n");
+  }
+  else
+  {
+    printf( "Error in test 14: poly returned %d.\n", result );
   }
   
 
