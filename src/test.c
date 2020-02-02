@@ -35,6 +35,17 @@ int numPoints43 = (int) (sizeof(m_pts43) / sizeof(m_pts43[0]));
 double coeff43[] = {0, 0, 0};
 int numCoeffs43 = (int) (sizeof(coeff43) / sizeof(coeff43[0]));
 
+// Create a failure test case with impossible data
+point_t m_pts13[] =
+{
+  {0,0},
+  {1,1},
+  {1,1},
+  {0,0}, 
+};
+int numPoints13 = (int) (sizeof(m_pts13) / sizeof(m_pts13[0]));
+double coeff13[] = {0, 0, 0};
+int numCoeffs13 = (int) (sizeof(coeff13) / sizeof(coeff13[0]));
 
 
 
@@ -64,6 +75,20 @@ int main()
   {
     printf( "Error in test 4.3 B: poly returned %d.\n", result );
   }
+
+  result = poly( numPoints13, &m_pts13[0], numCoeffs13, &coeff13[0]);
+  if( 0 == result)
+  {
+    printf( "Test unlucky 13 polynomial = ");
+    showPoly( numCoeffs13, &coeff13[0] );
+    printf("Test 13polynomial should fail since we are fitting a parabola to only two unique points.\n");
+  }
+  else
+  {
+    printf( "Expected error in test 13 is OK: poly returned %d.\n", result );
+  }
+  
+
   
   return( 0 );
 }
