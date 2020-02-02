@@ -8,35 +8,35 @@ Synopsis
 
 **#include "polyfit.h"**
 
-__int polyfit( int__ _pointCount_, **double \***_x_, **double \***_y_,  __int__ _coefficientCount_, **double \***_coefficients_ __);__
+__int polyfit( int__ _pointCount_, **double \***_xValues_, **double \***_yValues_,  __int__ _coefficientCount_, **double \***_coefficientResults_ __);__
 
 Description
 ===========
 
-The **polyfit**() function regresses a line or a higher-order polynomial to a set of points, using the Method of Least Squares. Its design goals were simplicity and ease of porting, as opposed to run-time efficiency when using large data-sets.
+The **polyfit**() function regresses a line or a higher-order polynomial to a set of points, using the Method of Least Squares. Its design goals were simplicity and ease of porting, as opposed to run-time efficiency with large data.
 
 Arguments
 ---------
 _pointCount_ — input. The total number of points in the set. For the algorithm to work, this must be greater than or equal to _coefficientCount_.
 
-_x_  — input. Points to the X coordinates of the points.
+_xValues_  — input. Points to an array of the X coordinates of the points. There should be _pointCount_ X coordinates.
 
-_y_ — input. Points to the Y coordinates of the points.
+_yValues_ — input. Points to an array of the Y coordinates of the points. There should be _pointCount_ Y coordinates.
 
-_coefficientCount_ — input. The number of coefficients to be computed, equal to the degree of the polynomial plus 1. For instance, if fitting a line _coefficientCount_ would be 2, and for fitting a parabola it would be 3.
+_coefficientCount_ — input. The number of coefficients to be computed, equal to the degree of the polynomial plus 1. For instance, if fitting a line — a first degree polynomial — then _coefficientCount_ would be 2, and for fitting a parabola — a second degree polynomial — _coefficientCount_ would be 3.
 
-_coefficients_ — input pointing to the coefficient values that will get modified. The resulting coefficients are ordered   such that the polynomial:
+_results_ — input. Points to where the computed coefficients will be stored. There should be space for _coefficientCount_ coefficients. These coefficients are ordered from the highest-order monomial term to the lowest, such that for instance the polynomial:
 
-     (5.7 * x^2) + (3.1 * x) - 15.4
+     5x² + 3x - 7
      
-produces:
+is represented as:
 
-     [ -15.4, 3.1, 5.7 ] 
+     [ 5, 3, -7 ] 
 
 
 Return Value
 ------------
-In addition to setting the coefficients, the **polyfit**() function returns **0** on success.
+In addition to setting the coefficient results, the **polyfit**() function returns **0** on success.
 
 FILES
 -----
@@ -44,4 +44,10 @@ FILES
 
 *./inc/polyfit.h* — declares the **polyfit**() function's prototype.
 
-In addition, *test.c* exercises **polyfit**() and provides examples of usage, and *Makefile* builds an executable for testing on Linux using _gcc C99_.
+MISC
+----
+To support unit testing on Linux with gcc, the repo has these additional files:
+
+*./src/test.c* — exercises **polyfit**() and provides examples of usage.
+
+*./Makefile* — allows the *make* command to build an executable, *./bin/polytest*, that tests **polyfit**().
