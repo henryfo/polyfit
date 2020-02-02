@@ -45,15 +45,15 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
     int rVal = 0;
     int i;
 
-    printf( "pointCount = %d:", pointCount );
+    // printf( "pointCount = %d:", pointCount );
 
-    for( i = 0; i < pointCount; i++ )
-    {
-        printf( " ( %f, %f )", pointArray[i].x, pointArray[i].y );
-    }
-    printf( "\n");
+    // for( i = 0; i < pointCount; i++ )
+    // {
+    //     printf( " ( %f, %f )", pointArray[i].x, pointArray[i].y );
+    // }
+    // printf( "\n");
 
-    printf( "coeffCount = %d:", coeffCount );
+    // printf( "coeffCount = %d:", coeffCount );
 
     // Make the A matrix:
     matrix_t *pMatA = createMatrix( pointCount, coeffCount );
@@ -65,8 +65,8 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
         }
     }
 
-    printf( "matA = \n");
-    showMat( pMatA );
+    // printf( "matA = \n");
+    // showMat( pMatA );
 
     // Make the b matrix
     matrix_t *pMatB = createMatrix( pointCount, 1);
@@ -75,24 +75,91 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
         *(MATRIX_VALUE_PTR(pMatB, r, 0)) = pointArray[r].y;
     }
 
-    printf( "matB = \n");
-    showMat( pMatB );
+    // printf( "matB = \n");
+    // showMat( pMatB );
 
     // Make the transpose of matrix A
     matrix_t * pMatAT = makeTranspose( pMatA );
-    printf( "matAT = \n");
-    showMat( pMatAT );
+    // printf( "matAT = \n");
+    // showMat( pMatAT );
 
     // Make the product of matrices AT and A:
     matrix_t *pMatATA = makeProduct( pMatAT, pMatA );
-    printf( "matAT * matA = \n");
-    showMat( pMatATA );
+    // printf( "(matAT * matA) =\n");
+    // showMat( pMatATA );
 
-    // make the product of matrices AT and b:
+    // Make the product of matrices AT and b:
     matrix_t *pMatATb = makeProduct( pMatAT, pMatB );
-    printf( "matAT * matB = \n");
-    showMat( pMatATb );
+    // printf( "(matAT * matB) = \n");
+    // showMat( pMatATb );
 
+    // Now we need to solve the syhstem of linear equations,
+    // (AT)Ax = (AT)b for "x", the coefficients of the polynomial.
+
+    for( int c = 0; c < pMatATA->cols; c++ )
+    {
+        // Todo: find the pivot row, having the max absolute value
+        // in column C.
+        int pr = c;
+        // now, pr is the pivot row.
+        double prVal = *MATRIX_VALUE_PTR(pMatATA, pr, c);
+        // If it's zero, we can't solve the equations.
+        if( 0.0 == prVal )
+        {
+            // printf( "Unable to solve equations, pr = %d, c = %d.\n", pr, c );
+            // showMat( pMatATA );
+            rVal = -1;
+            break;
+        }
+        for( int r = 0; r < pMatATA->rows; r++)
+        {
+            if( r != pr )
+            {
+                double targetRowVal = *MATRIX_VALUE_PTR(pMatATA, r, c);
+                double factor = targetRowVal / prVal;
+                for( int c2 = 0; c2 < pMatATA->cols; c2++ )
+                {
+                    *MATRIX_VALUE_PTR(pMatATA, r, c2) -=  *MATRIX_VALUE_PTR(pMatATA, pr, c2) * factor; 
+                    // printf( "c = %d, pr = %d, r = %d, c2=%d, targetRowVal = %f, prVal = %f, factor = %f.\n",
+                    //         c, pr, r, c2, targetRowVal, prVal, factor );
+                    // printf( "reduced matATA =\n");
+                    // showMat( pMatATA );
+                   
+                }
+                *MATRIX_VALUE_PTR(pMatATb, r, 0) -=  *MATRIX_VALUE_PTR(pMatATb, pr, 0) * factor;
+                // printf( "reduced matATb =\n");
+                // showMat( pMatATb );
+            }
+        }
+    }
+    for( int c = 0; c < pMatATA->cols; c++ )
+    {
+        int pr = c;
+        // now, pr is the pivot row.
+        double prVal = *MATRIX_VALUE_PTR(pMatATA, pr, c);
+        *MATRIX_VALUE_PTR(pMatATA, pr, c) /= prVal;
+        *MATRIX_VALUE_PTR(pMatATb, pr, 0) /= prVal;
+    }
+
+    // printf( "reduced matATA =\n");
+    // showMat( pMatATA );
+
+    // printf( "reduced matATb =\n");
+    // showMat( pMatATb );
+
+    if( NULL == coeffArray )
+    {
+        printf( "poly: coeffArray was NULL!\n");
+        rVal = -1;
+    }
+    else
+    {
+        for( int i = 0; i < coeffCount; i++)
+        {
+            coeffArray[i] = *MATRIX_VALUE_PTR(pMatATb, i, 0);
+        }
+    }
+    
     destroyMatrix( pMatATb );
     destroyMatrix( pMatATA );
     destroyMatrix( pMatAT );
