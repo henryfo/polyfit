@@ -1,10 +1,10 @@
-// file: mls.h
+// file: polyfit.h
 // Description:	Header file for MLS polynomial fitting.
 // Author: Henry Forson
 // Copyright 2020 Henry Forson, Melbourne, FL
 
-#ifndef MLS_H
-#define MLS_H
+#ifndef POLYFIT_H
+#define POLYFIT_H
 
 //------------------------------------------------
 // TYPEDEFS
@@ -18,38 +18,13 @@ typedef struct point_s
 } point_t;
 
 
-// Structure of a vector.
-typedef struct vector_s
-{
-	int	count;
-	double * pElement;
-} vector_t;
-
-// Structure of a list of points.
-typedef struct pointlist_s
-{
-	int count;
-	point_t *pPoints;
-} pointlist_t;
-
-// Structure of a matrix.
-typedef struct matrix_s
-{
-	int	rows;
-	int	cols;
-	double *pContents;
-} matrix_t;
-
-// MACRO to access a value with a matrix.
-#define MATRIX_VALUE_PTR( pA, row, col )  (&(((pA)->pContents)[ (row * (pA)->cols) + col]))
-
 
 //------------------------------------------------
 // Function Prototypes
 //------------------------------------------------
 
 //--------------------------------------------------------
-// poly()
+// polyfit()
 // Computes polynomial coefficients that best fit a set
 // of input points.
 //
@@ -58,7 +33,7 @@ typedef struct matrix_s
 //
 // Returns 0 if success.
 //--------------------------------------------------------
-int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] );
+int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] );
 
 //--------------------------------------------------------
 // showPoly()
@@ -68,4 +43,4 @@ void showPoly( int coeffCount, double coeffArray[] );
 
 
 
-#endif	// MLS_H
+#endif	// POLYFIT_H

@@ -4,7 +4,7 @@
 // Coyright ©2020 Henry Forson, Melbourne, Florida USA
 
 #include  <stdio.h>
-#include  "mls.h"
+#include  "polyfit.h"
 
 // Create test data to find the closest line to (0,6), (1,0), and (2,0).
 // See also page 218 of: https://math.mit.edu/~gs/linearalgebra/ila0403.pdf
@@ -68,7 +68,7 @@ int numCoeffs14 = (int) (sizeof(coeff14) / sizeof(coeff14[0]));
 int main()
 {
   // printf("Hello world test stub.\n" );
-  int result = poly( numPoints, &m_pts1[0], numCoeffs, &coeff1[0]);
+  int result = polyfit( numPoints, &m_pts1[0], numCoeffs, &coeff1[0]);
   if( 0 == result)
   {
     printf( "Test 1 polynomial = ");
@@ -77,10 +77,10 @@ int main()
   }
   else
   {
-    printf( "Error in test 1: poly returned %d.\n", result );
+    printf( "Error in test 1: polyfit returned %d.\n", result );
   }
   
- result = poly( numPoints43, &m_pts43[0], numCoeffs43, &coeff43[0]);
+ result = polyfit( numPoints43, &m_pts43[0], numCoeffs43, &coeff43[0]);
   if( 0 == result)
   {
     printf( "Test 4.3 B polynomial = ");
@@ -89,10 +89,10 @@ int main()
   }
   else
   {
-    printf( "Error in test 4.3 B: poly returned %d.\n", result );
+    printf( "Error in test 4.3 B: polyfit returned %d.\n", result );
   }
 
-  result = poly( numPoints13, &m_pts13[0], numCoeffs13, &coeff13[0]);
+  result = polyfit( numPoints13, &m_pts13[0], numCoeffs13, &coeff13[0]);
   if( 0 == result)
   {
     printf( "Test unlucky 13 polynomial = ");
@@ -101,19 +101,19 @@ int main()
   }
   else
   {
-    printf( "Expected error in test 13 is OK: poly returned %d.\n", result );
+    printf( "Expected error in test 13 is OK: polyfit returned %d.\n", result );
   }
   
-  result = poly( numPoints14, &m_pts14[0], numCoeffs14, &coeff14[0]);
+  result = polyfit( numPoints14, &m_pts14[0], numCoeffs14, &coeff14[0]);
   if( 0 == result)
   {
     printf( "Test 14 polynomial = ");
     showPoly( numCoeffs14, &coeff14[0] );
-    printf("Test 14 polynomial should be equivalent to 0.305 + (1.518 * x).\n");
+    printf("Test 14 polynomial should be approximately 0.305 + (1.518 * x).\n");
   }
   else
   {
-    printf( "Error in test 14: poly returned %d.\n", result );
+    printf( "Error in test 14: polyfit returned %d.\n", result );
   }
   
 

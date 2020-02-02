@@ -9,10 +9,10 @@ BDIR =./bin
 
 LIBS =-lm
 
-_DEPS = mls.h
+_DEPS = polyfit.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = test.o mls.o 
+_OBJ = test.o polyfit.o 
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 #./obj/test.o: ./src/test.c $(DEPS)
@@ -21,11 +21,11 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-mlstest: $(OBJ)
+polytest: $(OBJ)
 	$(CC) -o $(BDIR)/$@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(BDIR)/mlstest
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(BDIR)/polytest
 

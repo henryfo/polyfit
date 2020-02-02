@@ -1,13 +1,26 @@
-// Name: mls.c
-// Description: MLS polynomial fitting functions.
+// Name: polyfit.c
+// Description: Simple polynomial fitting functions.
 // Author: Henry Forson
 // Coyright ©2020 Henry Forson, Melbourne, Florida USA
 
-#include <stdio.h>
+#include <stdio.h>      // printf()
 #include <stdlib.h>     // calloc()
 #include <math.h>       // pow()
 #include <stdbool.h>    // bool
-#include "mls.h"
+#include "polyfit.h"
+
+
+// Structure of a matrix.
+typedef struct matrix_s
+{
+	int	rows;
+	int	cols;
+	double *pContents;
+} matrix_t;
+
+// MACRO to access a value with a matrix.
+#define MATRIX_VALUE_PTR( pA, row, col )  (&(((pA)->pContents)[ (row * (pA)->cols) + col]))
+
 
 //------------------------------------------------
 // Private Function Prototypes
@@ -26,7 +39,7 @@ static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 
 
 //--------------------------------------------------------
-// poly()
+// polyfit()
 // Computes polynomial coefficients that best fit a set
 // of input points.
 //
@@ -45,7 +58,7 @@ static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 //
 // Returns 0 if success.
 //--------------------------------------------------------
-int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] )
+int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] )
 {
     int rVal = 0;
     int i;
