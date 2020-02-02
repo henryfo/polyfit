@@ -1,7 +1,7 @@
 Name
 ====
 
-**polyfit** — fits a polynomial to a set of points
+**polyfit** — "C" function that fits a polynomial to a set of points
 
 Synopsis
 ========
@@ -13,11 +13,11 @@ __int polyfit( int__ _pointCount_, **double \***_x_, **double \***_y_,  __int__ 
 Description
 ===========
 
-The **polyfit**() function regresses a line or a higher-order polynomial to a set of points, using the Method of Least Squares. It was written in "C" with design goals of simplicity and ease of porting, instead of optimizing for large data-sets.
+The **polyfit**() function regresses a line or a higher-order polynomial to a set of points, using the Method of Least Squares. Its design goals were simplicity and ease of porting, as opposed to run-time efficiency when using large data-sets.
 
 Arguments
 ---------
-_pointCount_ — input. The total number of points in the set. For the algorithm to work, this must be greater or equal to _coefficientCount_.
+_pointCount_ — input. The total number of points in the set. For the algorithm to work, this must be greater than or equal to _coefficientCount_.
 
 _x_  — input. Points to the X coordinates of the points.
 
@@ -38,4 +38,4 @@ FILES
 
 *./inc/polyfit.h* — declares the *polyfit*() function's prototype.
 
-In addition, *test.c* exercises **polyfit**() and provides examples of usage, and *Makefile* build an executable for testing on Linux using **gcc**'s C99.
+In addition, *test.c* exercises **polyfit**() and provides examples of usage, and *Makefile* builds an executable for testing on Linux using gcc C99.
