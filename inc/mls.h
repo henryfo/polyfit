@@ -60,5 +60,12 @@ typedef struct matrix_s
 //--------------------------------------------------------
 int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] );
 
+//--------------------------------------------------------
+// showPoly()
+// Prints the coefficients of a polynomial.
+//--------------------------------------------------------
+void showPoly( int coeffCount, double coeffArray[] );
+
+
 
 #endif	// MLS_H

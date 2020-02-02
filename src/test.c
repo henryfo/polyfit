@@ -44,12 +44,9 @@ int main()
   int result = poly( numPoints, &m_pts1[0], numCoeffs, &coeff1[0]);
   if( 0 == result)
   {
-    printf( "test 1 polynomial = ");
-    for( int i = 0; i < numCoeffs; i++)
-    {
-      printf( "(%f * x^%d)%s", coeff1[i], i, i < (numCoeffs - 1) ? " + " : "" );
-    }
-    printf("; should be equivalent to 5 + -3x.\n");
+    printf( "Test 1 polynomial = ");
+    showPoly( numCoeffs, &coeff1[0] );
+    printf("Test 1 polynomial should be equivalent to 5 + -3x.\n");
   }
   else
   {
@@ -59,12 +56,9 @@ int main()
  result = poly( numPoints43, &m_pts43[0], numCoeffs43, &coeff43[0]);
   if( 0 == result)
   {
-    printf( "test 4.3 B polynomial = ");
-    for( int i = 0; i < numCoeffs43; i++)
-    {
-      printf( "(%f * x^%d)%s", coeff43[i], i, i < (numCoeffs43 - 1) ? " + " : "" );
-    }
-    printf("; should be equivalent to (34/70) + (-10/70)(x^2).\n");
+    printf( "Test 4.3 B polynomial = ");
+    showPoly( numCoeffs43, &coeff43[0] );
+    printf("Test 4.3 B polynomial should be equivalent to (34/70) + (-10/70)(x^2).\n");
   }
   else
   {

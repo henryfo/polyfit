@@ -6,18 +6,23 @@
 #include <stdio.h>
 #include <stdlib.h>     // calloc()
 #include <math.h>       // pow()
+#include <stdbool.h>    // bool
 #include "mls.h"
 
 //------------------------------------------------
-// Function Prototypes
+// Private Function Prototypes
 //------------------------------------------------
 
-void showMat( matrix_t *pMat );
-matrix_t * makeTranspose( matrix_t *pMat );
-matrix_t * makeProduct( matrix_t *pLeft, matrix_t *pRight );
-void destroyMatrix( matrix_t *pMat );
-matrix_t *createMatrix( int rows, int cols );
+static matrix_t *   createMatrix( int rows, int cols );
+static void         destroyMatrix( matrix_t *pMat );
+static void         showMatrix( matrix_t *pMat );
+static matrix_t *   createTranspose( matrix_t *pMat );
+static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 
+
+//=========================================================
+//      Global function definitions
+//=========================================================
 
 
 //--------------------------------------------------------
@@ -29,9 +34,9 @@ matrix_t *createMatrix( int rows, int cols );
 // the count of elements in the polynomial vector.
 //
 // Uses matrix algebra of the form:
-//              Ax = b
+//              A * x = b
 // To solve the MLS equation:
-//              (AT)Ax = (AT)b
+//              (AT) * A * x = (AT) * b
 // where (AT) is the transpose of A.
 //
 // If the n+1 input points are {(x0, y0), (x1, y1), ... (xn, yn)},
@@ -66,32 +71,32 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
     }
 
     // printf( "matA = \n");
-    // showMat( pMatA );
+    // showMatrix( pMatA );
 
     // Make the b matrix
     matrix_t *pMatB = createMatrix( pointCount, 1);
-     for( int r = 0; r < pointCount; r++)
+    for( int r = 0; r < pointCount; r++)
     {
         *(MATRIX_VALUE_PTR(pMatB, r, 0)) = pointArray[r].y;
     }
 
     // printf( "matB = \n");
-    // showMat( pMatB );
+    // showMatrix( pMatB );
 
     // Make the transpose of matrix A
-    matrix_t * pMatAT = makeTranspose( pMatA );
+    matrix_t * pMatAT = createTranspose( pMatA );
     // printf( "matAT = \n");
-    // showMat( pMatAT );
+    // showMatrix( pMatAT );
 
     // Make the product of matrices AT and A:
-    matrix_t *pMatATA = makeProduct( pMatAT, pMatA );
+    matrix_t *pMatATA = createProduct( pMatAT, pMatA );
     // printf( "(matAT * matA) =\n");
-    // showMat( pMatATA );
+    // showMatrix( pMatATA );
 
     // Make the product of matrices AT and b:
-    matrix_t *pMatATb = makeProduct( pMatAT, pMatB );
+    matrix_t *pMatATB = createProduct( pMatAT, pMatB );
     // printf( "(matAT * matB) = \n");
-    // showMat( pMatATb );
+    // showMatrix( pMatATB );
 
     // Now we need to solve the syhstem of linear equations,
     // (AT)Ax = (AT)b for "x", the coefficients of the polynomial.
@@ -107,7 +112,7 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
         if( 0.0 == prVal )
         {
             // printf( "Unable to solve equations, pr = %d, c = %d.\n", pr, c );
-            // showMat( pMatATA );
+            // showMatrix( pMatATA );
             rVal = -1;
             break;
         }
@@ -123,12 +128,12 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
                     // printf( "c = %d, pr = %d, r = %d, c2=%d, targetRowVal = %f, prVal = %f, factor = %f.\n",
                     //         c, pr, r, c2, targetRowVal, prVal, factor );
                     // printf( "reduced matATA =\n");
-                    // showMat( pMatATA );
+                    // showMatrix( pMatATA );
                    
                 }
-                *MATRIX_VALUE_PTR(pMatATb, r, 0) -=  *MATRIX_VALUE_PTR(pMatATb, pr, 0) * factor;
+                *MATRIX_VALUE_PTR(pMatATB, r, 0) -=  *MATRIX_VALUE_PTR(pMatATB, pr, 0) * factor;
                 // printf( "reduced matATb =\n");
-                // showMat( pMatATb );
+                // showMatrix( pMatATB );
             }
         }
     }
@@ -138,14 +143,14 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
         // now, pr is the pivot row.
         double prVal = *MATRIX_VALUE_PTR(pMatATA, pr, c);
         *MATRIX_VALUE_PTR(pMatATA, pr, c) /= prVal;
-        *MATRIX_VALUE_PTR(pMatATb, pr, 0) /= prVal;
+        *MATRIX_VALUE_PTR(pMatATB, pr, 0) /= prVal;
     }
 
     // printf( "reduced matATA =\n");
-    // showMat( pMatATA );
+    // showMatrix( pMatATA );
 
     // printf( "reduced matATb =\n");
-    // showMat( pMatATb );
+    // showMatrix( pMatATB );
 
     if( NULL == coeffArray )
     {
@@ -156,25 +161,58 @@ int poly( int pointCount, point_t pointArray[],  int coeffCount, double coeffArr
     {
         for( int i = 0; i < coeffCount; i++)
         {
-            coeffArray[i] = *MATRIX_VALUE_PTR(pMatATb, i, 0);
+            coeffArray[i] = *MATRIX_VALUE_PTR(pMatATB, i, 0);
         }
     }
     
-    destroyMatrix( pMatATb );
+    destroyMatrix( pMatATB );
     destroyMatrix( pMatATA );
     destroyMatrix( pMatAT );
 
-    destroyMatrix( pMatA );     // Free matrix A
-    destroyMatrix( pMatB );     // Free matrix b
+    destroyMatrix( pMatA );
+    destroyMatrix( pMatB );
     return rVal;
 }
+
+//--------------------------------------------------------
+// showPoly()
+// Prints the coefficients of a polynomial.
+//--------------------------------------------------------
+void showPoly( int coeffCount, double coeffArray[] )
+{
+    for( int i = 0; i < coeffCount; i++)
+    {
+        bool isLastTerm = ((i + 1) >= coeffCount);
+        bool isTermPrintable = (coeffArray[i] != 0.0);
+        if( isTermPrintable )
+        {
+            if( 0 == i )
+            {
+                printf( "%f%s", coeffArray[ i ], isLastTerm ? "" : " + " );
+            }
+            else if( 1 == i)
+            {
+                printf( "(%f * x)%s", coeffArray[ i ], isLastTerm ? "" : " + " );
+            }
+            else
+            {
+                printf( "(%f * x^%d)%s", coeffArray[i], i, isLastTerm ? "" : " + "  );
+            }
+        }
+    }
+    printf("\n");
+}
+
+//=========================================================
+//      Private function definitions
+//=========================================================
 
 
 //--------------------------------------------------------
 // showmat()
 // Printf the contents of a matrix
 //--------------------------------------------------------
-void showMat( matrix_t *pMat )
+static void showMatrix( matrix_t *pMat )
 {
     for( int r = 0; r < pMat->rows; r++ )
     {
@@ -187,13 +225,13 @@ void showMat( matrix_t *pMat )
 }
 
 //--------------------------------------------------------
-// makeTranspose()
+// createTranspose()
 // Returns the transpose of a matrix, or NULL.
 //
 // The caller must free both the allocated matrix
 // and its contents array.
 //--------------------------------------------------------
-matrix_t * makeTranspose( matrix_t *pMat )
+static matrix_t * createTranspose( matrix_t *pMat )
 {
     matrix_t *rVal = (matrix_t *) calloc(1, sizeof(matrix_t));
     rVal->pContents = (double *) calloc( pMat->rows * pMat->cols, sizeof( double ));
@@ -210,18 +248,18 @@ matrix_t * makeTranspose( matrix_t *pMat )
 }
 
 //--------------------------------------------------------
-// makeProduct()
+// createProduct()
 // Returns the product of two matrices, or NULL.
 //
 // The caller must free both the allocated product matrix
 // and its contents array.
 //--------------------------------------------------------
-matrix_t * makeProduct( matrix_t *pLeft, matrix_t *pRight )
+static matrix_t * createProduct( matrix_t *pLeft, matrix_t *pRight )
 {
     matrix_t *rVal = NULL;
     if( (NULL == pLeft) || (NULL == pRight) || (pLeft->cols != pRight->rows) )
     {
-        printf( "Illegal parameter passed to makeProduct().\n");
+        printf( "Illegal parameter passed to createProduct().\n");
     }
     else
     {
@@ -253,7 +291,7 @@ matrix_t * makeProduct( matrix_t *pLeft, matrix_t *pRight )
 // destroyMatrix()
 // Frees both the allocated matrix and its contents array.
 //--------------------------------------------------------
-void destroyMatrix( matrix_t *pMat )
+static void destroyMatrix( matrix_t *pMat )
 {
     if(NULL != pMat)
     {
@@ -269,7 +307,7 @@ void destroyMatrix( matrix_t *pMat )
 // createMatrix()
 // Allocates the matrix and clears its contents array.
 //--------------------------------------------------------
-matrix_t *createMatrix( int rows, int cols )
+static matrix_t *createMatrix( int rows, int cols )
 {
     matrix_t *rVal = (matrix_t *) calloc(1, sizeof(matrix_t));
     if(NULL != rVal)

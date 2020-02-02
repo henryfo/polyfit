@@ -1,6 +1,6 @@
 IDIR =./inc
 CC=gcc
-CFLAGS=-I$(IDIR)
+CFLAGS=-I$(IDIR) -std=c99 -pedantic-errors
 
 ODIR =./obj
 LDIR =./lib
