@@ -6,18 +6,6 @@
 #ifndef POLYFIT_H
 #define POLYFIT_H
 
-//------------------------------------------------
-// TYPEDEFS
-//------------------------------------------------
-
-// Structure of a point.
-typedef struct point_s
-{
-	double x;
-	double y;
-} point_t;
-
-
 
 //------------------------------------------------
 // Function Prototypes
@@ -33,13 +21,13 @@ typedef struct point_s
 //
 // Returns 0 if success.
 //--------------------------------------------------------
-int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] );
+int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults );
 
 //--------------------------------------------------------
 // showPoly()
 // Prints the coefficients of a polynomial.
 //--------------------------------------------------------
-void showPoly( int coeffCount, double coeffArray[] );
+void showPoly( int coeffCount, double *coefficients );
 
 
 

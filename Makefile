@@ -18,6 +18,12 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 #./obj/test.o: ./src/test.c $(DEPS)
 #	$(CC) -c -o ./obj/test.o ./src/test.c $(CFLAGS)
 
+all: dirs polytest
+
+dirs:
+	mkdir -p $(ODIR)
+	mkdir -p $(BDIR)
+
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 

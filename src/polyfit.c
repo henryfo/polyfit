@@ -56,30 +56,52 @@ static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 // then the i'th row of A is: {(xi)^0, (xi)^1, ... (xn)^n},
 // and the i'th row of b is: {yi}.
 //
-// Returns 0 if success.
+// Returns   0 if success, 
+//          -1 if passed a NULL pointer,
+//          -2 if (pointCount < coefficientCount),
+//          -3 if unable to allocate memory,
+//          -4 if unable to solve equations.
 //--------------------------------------------------------
-int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] )
+//int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] )
+int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults )
 {
     int rVal = 0;
     int i;
+    int degree = coefficientCount - 1;
+
+    // Check that the input pointers aren't null.
+    if( (NULL == xValues) || (NULL == yValues) || (NULL == coefficientResults) )
+    {
+        return -1;
+    }
+    // Check that pointCount >= coefficientCount.
+    if(pointCount < coefficientCount)
+    {
+        return -2;
+    }
 
     // printf( "pointCount = %d:", pointCount );
 
     // for( i = 0; i < pointCount; i++ )
     // {
-    //     printf( " ( %f, %f )", pointArray[i].x, pointArray[i].y );
+    //     printf( " ( %f, %f )", xValues[i], yValues[i] );
     // }
     // printf( "\n");
 
-    // printf( "coeffCount = %d:", coeffCount );
+    // printf( "coefficientCount = %d\n", coefficientCount );
 
     // Make the A matrix:
-    matrix_t *pMatA = createMatrix( pointCount, coeffCount );
+    matrix_t *pMatA = createMatrix( pointCount, coefficientCount );
+    if( NULL == pMatA)
+    {
+        return -3;
+    }
+
     for( int r = 0; r < pointCount; r++)
     {
-        for( int c = 0; c < coeffCount; c++)
+        for( int c = 0; c < coefficientCount; c++)
         {
-            *(MATRIX_VALUE_PTR(pMatA, r, c)) = pow((pointArray[r].x), (double) c);
+            *(MATRIX_VALUE_PTR(pMatA, r, c)) = pow((xValues[r]), (double) (degree -c));
         }
     }
 
@@ -88,9 +110,14 @@ int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeff
 
     // Make the b matrix
     matrix_t *pMatB = createMatrix( pointCount, 1);
+    if( NULL == pMatB )
+    {
+        return -3;
+    }
+
     for( int r = 0; r < pointCount; r++)
     {
-        *(MATRIX_VALUE_PTR(pMatB, r, 0)) = pointArray[r].y;
+        *(MATRIX_VALUE_PTR(pMatB, r, 0)) = yValues[r];
     }
 
     // printf( "matB = \n");
@@ -98,35 +125,46 @@ int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeff
 
     // Make the transpose of matrix A
     matrix_t * pMatAT = createTranspose( pMatA );
+    if( NULL == pMatAT )
+    {
+        return -3;
+    }
+
     // printf( "matAT = \n");
     // showMatrix( pMatAT );
 
     // Make the product of matrices AT and A:
     matrix_t *pMatATA = createProduct( pMatAT, pMatA );
+    if( NULL == pMatATA )
+    {
+        return -3;
+    }
+
     // printf( "(matAT * matA) =\n");
     // showMatrix( pMatATA );
 
     // Make the product of matrices AT and b:
     matrix_t *pMatATB = createProduct( pMatAT, pMatB );
+    if( NULL == pMatATB )
+    {
+        return -3;
+    }
     // printf( "(matAT * matB) = \n");
     // showMatrix( pMatATB );
 
-    // Now we need to solve the syhstem of linear equations,
+    // Now we need to solve the system of linear equations,
     // (AT)Ax = (AT)b for "x", the coefficients of the polynomial.
 
     for( int c = 0; c < pMatATA->cols; c++ )
     {
-        // Todo: find the pivot row, having the max absolute value
-        // in column C.
-        int pr = c;
-        // now, pr is the pivot row.
+        int pr = c;     // pr is the pivot row.
         double prVal = *MATRIX_VALUE_PTR(pMatATA, pr, c);
         // If it's zero, we can't solve the equations.
         if( 0.0 == prVal )
         {
             // printf( "Unable to solve equations, pr = %d, c = %d.\n", pr, c );
             // showMatrix( pMatATA );
-            rVal = -1;
+            rVal = -4;
             break;
         }
         for( int r = 0; r < pMatATA->rows; r++)
@@ -165,18 +203,11 @@ int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeff
     // printf( "reduced matATb =\n");
     // showMatrix( pMatATB );
 
-    if( NULL == coeffArray )
+    for( int i = 0; i < coefficientCount; i++)
     {
-        printf( "poly: coeffArray was NULL!\n");
-        rVal = -1;
+        coefficientResults[i] = *MATRIX_VALUE_PTR(pMatATB, i, 0);
     }
-    else
-    {
-        for( int i = 0; i < coeffCount; i++)
-        {
-            coeffArray[i] = *MATRIX_VALUE_PTR(pMatATB, i, 0);
-        }
-    }
+
     
     destroyMatrix( pMatATB );
     destroyMatrix( pMatATA );
@@ -191,26 +222,29 @@ int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeff
 // showPoly()
 // Prints the coefficients of a polynomial.
 //--------------------------------------------------------
-void showPoly( int coeffCount, double coeffArray[] )
+//void showPoly( int coeffCount, double coeffArray[] )
+void showPoly( int coeffCount, double *coefficients )
 {
+    bool isThisTheFirstTermShown = true;
     for( int i = 0; i < coeffCount; i++)
     {
-        bool isLastTerm = ((i + 1) >= coeffCount);
-        bool isTermPrintable = (coeffArray[i] != 0.0);
+        int exponent = (coeffCount - 1) - i;
+        bool isTermPrintable = (coefficients[i] != 0.0);
         if( isTermPrintable )
         {
-            if( 0 == i )
+            if( 0 == exponent )
             {
-                printf( "%f%s", coeffArray[ i ], isLastTerm ? "" : " + " );
+                printf( "%s%f", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
-            else if( 1 == i)
+            else if( 1 == exponent)
             {
-                printf( "(%f * x)%s", coeffArray[ i ], isLastTerm ? "" : " + " );
+                printf( "%s(%f * x)", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
             else
             {
-                printf( "(%f * x^%d)%s", coeffArray[i], i, isLastTerm ? "" : " + "  );
+                printf( "%s(%f * x^%d)", isThisTheFirstTermShown ? "" : " + ", coefficients[i], exponent );
             }
+            isThisTheFirstTermShown = false;
         }
     }
     printf("\n");
@@ -331,13 +365,10 @@ static matrix_t *createMatrix( int rows, int cols )
         if(NULL == rVal->pContents)
         {
             free( rVal );
+            rVal = NULL;
         }
     }
 
-    if( NULL == rVal )
-    {
-        printf("createMatrix() couldn't allocate matrix memory.\n");
-    }
     return rVal;
 }
 

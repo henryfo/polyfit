@@ -6,59 +6,43 @@
 #include  <stdio.h>
 #include  "polyfit.h"
 
+// ---------------- TEST 1 DATA ------------------------
 // Create test data to find the closest line to (0,6), (1,0), and (2,0).
 // See also page 218 of: https://math.mit.edu/~gs/linearalgebra/ila0403.pdf
+double x1[]   = { 0, 1, 2};
+double y1[]   = { 6, 0, 0};
+int pc1       = (int) (sizeof(x1) / sizeof(x1[0]));           // pointCount
+double cr1[]  = {0, 0};                                       // coefficientResults
+int cc1       =  (int) (sizeof(cr1) / sizeof(cr1[0]));        // coefficientCount
+char *er1     = "-3x + 5";                                    // expected result
 
-point_t m_pts1[] =
-{
-  {0,6},
-  {1,0},
-  {2,0}
-};
-int numPoints = (int) (sizeof(m_pts1) / sizeof(m_pts1[0]));
-
-double coeff1[] = {0, 0};
-int numCoeffs = (int) (sizeof(coeff1) / sizeof(coeff1[0]));
-
-// Create test data to find the closest parabola to the points shown
+// ---------------- TEST 2 DATA ------------------------
+// Create test data to find the closest parabola to the points shown.
 // as example "4.3 B" on page 226 of: https://math.mit.edu/~gs/linearalgebra/ila0403.pdf
-point_t m_pts43[] =
-{
-  {-2,0},
-  {-1,0},
-  {0,1},
-  {1,0},
-  {2,0}
-};
+double x2[]   = { -2, -1, 00, 1, 2};
+double y2[]   = { 0, 0, 1, 0, 0};
+int pc2       = (int) (sizeof(x2) / sizeof(x2[0]));           // pointCount
+double cr2[]  = {0, 0, 0};                                    // coefficientResults
+int cc2       =  (int) (sizeof(cr2) / sizeof(cr2[0]));        // coefficientCount
+char *er2     = "(-10/70)(x^2) + (34/70)";                    // expected result
 
-int numPoints43 = (int) (sizeof(m_pts43) / sizeof(m_pts43[0]));
-double coeff43[] = {0, 0, 0};
-int numCoeffs43 = (int) (sizeof(coeff43) / sizeof(coeff43[0]));
+// ---------------- TEST 3 DATA ------------------------
+// Create a failure test case with impossible to solve data.
+double x3[]   = { 0, 1, 1, 0};
+double y3[]   = { 0, 1, 1, 0};
+int pc3       = (int) (sizeof(x3) / sizeof(x3[0]));           // pointCount
+double cr3[]  = {0, 0, 0};                                    // coefficientResults
+int cc3       =  (int) (sizeof(cr3) / sizeof(cr3[0]));        // coefficientCount
+char *er3     = "this one should fail";                       // expected result
 
-// Create a failure test case with impossible data
-point_t m_pts13[] =
-{
-  {0,0},
-  {1,1},
-  {1,1},
-  {0,0}, 
-};
-int numPoints13 = (int) (sizeof(m_pts13) / sizeof(m_pts13[0]));
-double coeff13[] = {0, 0, 0};
-int numCoeffs13 = (int) (sizeof(coeff13) / sizeof(coeff13[0]));
-
+// ---------------- TEST 4 DATA ------------------------
 // test MLS regeression example from https://www.mathsisfun.com/data/least-squares-regression.html
-point_t m_pts14[] =
-{
-  {2,4},
-  {3,5},
-  {5,7},
-  {7,10}, 
-  {9,15}
-};
-int numPoints14 = (int) (sizeof(m_pts14) / sizeof(m_pts14[0]));
-double coeff14[] = {0, 0};
-int numCoeffs14 = (int) (sizeof(coeff14) / sizeof(coeff14[0]));
+double x4[]   = { 2, 3, 5, 7, 9};
+double y4[]   = { 4, 5, 7, 10, 15};
+int pc4       = (int) (sizeof(x4) / sizeof(x4[0]));           // pointCount
+double cr4[]  = {0, 0};                                       // coefficientResults
+int cc4       =  (int) (sizeof(cr4) / sizeof(cr4[0]));        // coefficientCount
+char *er4     = "(1.518 * x) + 0.305";                        // expected result
 
 
 //--------------------------------------------------------
@@ -67,56 +51,61 @@ int numCoeffs14 = (int) (sizeof(coeff14) / sizeof(coeff14[0]));
 //--------------------------------------------------------
 int main()
 {
-  // printf("Hello world test stub.\n" );
-  int result = polyfit( numPoints, &m_pts1[0], numCoeffs, &coeff1[0]);
-  if( 0 == result)
-  {
-    printf( "Test 1 polynomial = ");
-    showPoly( numCoeffs, &coeff1[0] );
-    printf("Test 1 polynomial should be equivalent to 5 + -3x.\n");
-  }
-  else
-  {
-    printf( "Error in test 1: polyfit returned %d.\n", result );
-  }
-  
- result = polyfit( numPoints43, &m_pts43[0], numCoeffs43, &coeff43[0]);
-  if( 0 == result)
-  {
-    printf( "Test 4.3 B polynomial = ");
-    showPoly( numCoeffs43, &coeff43[0] );
-    printf("Test 4.3 B polynomial should be equivalent to (34/70) + (-10/70)(x^2).\n");
-  }
-  else
-  {
-    printf( "Error in test 4.3 B: polyfit returned %d.\n", result );
-  }
+  int result;
 
-  result = polyfit( numPoints13, &m_pts13[0], numCoeffs13, &coeff13[0]);
+  //---------------------TEST 1---------------------------
+  printf( "Test 1 expecting %s\n", er1);
+  printf( "Test 1 produced ");
+  result = polyfit( pc1, x1, y1, cc1, cr1);
   if( 0 == result)
-  {
-    printf( "Test unlucky 13 polynomial = ");
-    showPoly( numCoeffs13, &coeff13[0] );
-    printf("Test 13 polynomial should fail since we are fitting a parabola to only two unique points.\n");
+  { 
+    showPoly( cc1, cr1 );
   }
   else
   {
-    printf( "Expected error in test 13 is OK: polyfit returned %d.\n", result );
+    printf( "result = %d.\n", result );
   }
   
-  result = polyfit( numPoints14, &m_pts14[0], numCoeffs14, &coeff14[0]);
+  //---------------------TEST 2---------------------------
+  printf( "Test 2 expecting %s\n", er2);
+  printf( "Test 2 produced ");
+  result = polyfit( pc2, x2, y2, cc2, cr2);
   if( 0 == result)
-  {
-    printf( "Test 14 polynomial = ");
-    showPoly( numCoeffs14, &coeff14[0] );
-    printf("Test 14 polynomial should be approximately 0.305 + (1.518 * x).\n");
+  { 
+    showPoly( cc2, cr2 );
   }
   else
   {
-    printf( "Error in test 14: polyfit returned %d.\n", result );
+    printf( "result = %d.\n", result );
   }
   
-
+ //---------------------TEST 3---------------------------
+  printf( "Test 3 expecting %s\n", er3);
+  printf( "Test 3 produced ");
+  result = polyfit( pc3, x3, y3, cc3, cr3);
+  if( 0 == result)
+  { 
+    showPoly( cc3, cr3 );
+  }
+  else
+  {
+    printf( "result = %d.\n", result );
+  }
+  
+//---------------------TEST 4---------------------------
+  printf( "Test 4 expecting %s\n", er4);
+  printf( "Test 4 produced ");
+  result = polyfit( pc4, x4, y4, cc4, cr4);
+  if( 0 == result)
+  { 
+    showPoly( cc4, cr4 );
+  }
+  else
+  {
+    printf( "result = %d.\n", result );
+  }
+  
+  
   
   return( 0 );
 }
