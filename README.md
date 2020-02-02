@@ -36,7 +36,7 @@ produces:
 
 Return Value
 ------------
-In addition to setting the coeffients, the **polyfit**() function returns **0** on success.
+In addition to setting the coefficients, the **polyfit**() function returns **0** on success.
 
 FILES
 -----
