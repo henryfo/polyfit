@@ -1,3 +1,59 @@
+# Name: Makefile
+# Description: Builds ./bin/polytest, to test the polyfit() function.
+# Test Environment: Ubuntu 18.04.4 LTS, GNU Make 4.1, gcc version 7.4.0.
+# Author: Henry M. Forson, Melbourne, Florida USA
+#
+# Synopsis:
+#	make clean		-- removes old build files from the repo.
+#	make			-- builds the ./bin/polytest executable.
+#	./bin/polytest	-- runs the executable.
+#
+# Results:
+#   $ make clean
+#   rm -f ./obj/*.o *~ core /*~ ./bin/polytest
+#
+#   $ make
+#   mkdir -p ./obj
+#   mkdir -p ./bin
+#   gcc -c -o obj/test.o src/test.c -I./inc -std=c99 -pedantic-errors -fsanitize=address -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds -fsanitize=null -Wall -Wextra -Wpedantic
+#   gcc -c -o obj/polyfit.o src/polyfit.c -I./inc -std=c99 -pedantic-errors -fsanitize=address -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds -fsanitize=null -Wall -Wextra -Wpedantic
+#   gcc -o ./bin/polytest obj/test.o obj/polyfit.o -I./inc -std=c99 -pedantic-errors -fsanitize=address -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds -fsanitize=null -Wall -Wextra -Wpedantic -lm
+#
+#   $ ./bin/polytest
+#   Test 1 expecting -3x + 5
+#   Test 1 produced (-3.000000 * x) + 5.000000
+#   Test 2 expecting (-10/70)(x^2) + (34/70)
+#   Test 2 produced (-0.142857 * x^2) + 0.485714
+#   Test 3 expecting this one should fail returning -4
+#   Test 3 produced result = -4.
+#   Test 4 expecting (1.518 * x) + 0.305
+#   Test 4 produced (1.518293 * x) + 0.304878
+
+#------------------------------------------------------------------------------------
+# MIT License
+#
+# Copyright (c) 2020 Henry M. Forson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#------------------------------------------------------------------------------------
+
+
 IDIR =./inc
 CC=gcc
 CFLAGS=-I$(IDIR) -std=c99 -pedantic-errors -fsanitize=address -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds -fsanitize=null -Wall -Wextra -Wpedantic
