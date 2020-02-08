@@ -33,7 +33,7 @@ double y3[]   = { 0, 1, 1, 0};
 int pc3       = (int) (sizeof(x3) / sizeof(x3[0]));           // pointCount
 double cr3[]  = {0, 0, 0};                                    // coefficientResults
 int cc3       =  (int) (sizeof(cr3) / sizeof(cr3[0]));        // coefficientCount
-char *er3     = "this one should fail";                       // expected result
+char *er3     = "this one should fail returning -4";          // expected result
 
 // ---------------- TEST 4 DATA ------------------------
 // test MLS regeression example from https://www.mathsisfun.com/data/least-squares-regression.html

@@ -1,6 +1,6 @@
 IDIR =./inc
 CC=gcc
-CFLAGS=-I$(IDIR) -std=c99 -pedantic-errors
+CFLAGS=-I$(IDIR) -std=c99 -pedantic-errors -fsanitize=address -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds -fsanitize=null -Wall -Wextra -Wpedantic
 
 ODIR =./obj
 LDIR =./lib

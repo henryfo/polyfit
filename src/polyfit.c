@@ -9,6 +9,8 @@
 #include <stdbool.h>    // bool
 #include "polyfit.h"
 
+// Define SHOW_MATRIX to display intermediate matrix values:
+// #define SHOW_MATRIX 1
 
 // Structure of a matrix.
 typedef struct matrix_s
@@ -21,6 +23,16 @@ typedef struct matrix_s
 // MACRO to access a value with a matrix.
 #define MATRIX_VALUE_PTR( pA, row, col )  (&(((pA)->pContents)[ (row * (pA)->cols) + col]))
 
+#ifdef SHOW_MATRIX
+#define showMatrix( x ) do {\
+    printf( "   @%d: " #x " =\n", __LINE__ ); \
+    reallyShowMatrix( x ); \
+    printf( "\n" ); \
+} while( 0 )
+#else   // SHOW_MATRIX
+#define showMatrix( x )
+#endif   // SHOW_MATRIX
+
 
 //------------------------------------------------
 // Private Function Prototypes
@@ -28,7 +40,9 @@ typedef struct matrix_s
 
 static matrix_t *   createMatrix( int rows, int cols );
 static void         destroyMatrix( matrix_t *pMat );
-static void         showMatrix( matrix_t *pMat );
+#ifdef SHOW_MATRIX
+static void         reallyShowMatrix( matrix_t *pMat );
+#endif  // SHOW_MATRIX
 static matrix_t *   createTranspose( matrix_t *pMat );
 static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 
@@ -66,7 +80,6 @@ static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults )
 {
     int rVal = 0;
-    int i;
     int degree = coefficientCount - 1;
 
     // Check that the input pointers aren't null.
@@ -105,8 +118,7 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         }
     }
 
-    // printf( "matA = \n");
-    // showMatrix( pMatA );
+    showMatrix( pMatA );
 
     // Make the b matrix
     matrix_t *pMatB = createMatrix( pointCount, 1);
@@ -120,9 +132,6 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         *(MATRIX_VALUE_PTR(pMatB, r, 0)) = yValues[r];
     }
 
-    // printf( "matB = \n");
-    // showMatrix( pMatB );
-
     // Make the transpose of matrix A
     matrix_t * pMatAT = createTranspose( pMatA );
     if( NULL == pMatAT )
@@ -130,8 +139,7 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         return -3;
     }
 
-    // printf( "matAT = \n");
-    // showMatrix( pMatAT );
+    showMatrix( pMatAT );
 
     // Make the product of matrices AT and A:
     matrix_t *pMatATA = createProduct( pMatAT, pMatA );
@@ -140,8 +148,7 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         return -3;
     }
 
-    // printf( "(matAT * matA) =\n");
-    // showMatrix( pMatATA );
+     showMatrix( pMatATA );
 
     // Make the product of matrices AT and b:
     matrix_t *pMatATB = createProduct( pMatAT, pMatB );
@@ -149,8 +156,8 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
     {
         return -3;
     }
-    // printf( "(matAT * matB) = \n");
-    // showMatrix( pMatATB );
+
+    showMatrix( pMatATB );
 
     // Now we need to solve the system of linear equations,
     // (AT)Ax = (AT)b for "x", the coefficients of the polynomial.
@@ -163,7 +170,7 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         if( 0.0 == prVal )
         {
             // printf( "Unable to solve equations, pr = %d, c = %d.\n", pr, c );
-            // showMatrix( pMatATA );
+            showMatrix( pMatATA );
             rVal = -4;
             break;
         }
@@ -178,13 +185,13 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
                     *MATRIX_VALUE_PTR(pMatATA, r, c2) -=  *MATRIX_VALUE_PTR(pMatATA, pr, c2) * factor; 
                     // printf( "c = %d, pr = %d, r = %d, c2=%d, targetRowVal = %f, prVal = %f, factor = %f.\n",
                     //         c, pr, r, c2, targetRowVal, prVal, factor );
-                    // printf( "reduced matATA =\n");
+
                     // showMatrix( pMatATA );
                    
                 }
                 *MATRIX_VALUE_PTR(pMatATB, r, 0) -=  *MATRIX_VALUE_PTR(pMatATB, pr, 0) * factor;
-                // printf( "reduced matATb =\n");
-                // showMatrix( pMatATB );
+
+                showMatrix( pMatATB );
             }
         }
     }
@@ -197,11 +204,9 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
         *MATRIX_VALUE_PTR(pMatATB, pr, 0) /= prVal;
     }
 
-    // printf( "reduced matATA =\n");
-    // showMatrix( pMatATA );
+    showMatrix( pMatATA );
 
-    // printf( "reduced matATb =\n");
-    // showMatrix( pMatATB );
+    showMatrix( pMatATB );
 
     for( int i = 0; i < coefficientCount; i++)
     {
@@ -254,12 +259,12 @@ void showPoly( int coeffCount, double *coefficients )
 //      Private function definitions
 //=========================================================
 
-
+#ifdef SHOW_MATRIX
 //--------------------------------------------------------
-// showmat()
+// reallyShowMatrix()
 // Printf the contents of a matrix
 //--------------------------------------------------------
-static void showMatrix( matrix_t *pMat )
+static void reallyShowMatrix( matrix_t *pMat )
 {
     for( int r = 0; r < pMat->rows; r++ )
     {
@@ -270,6 +275,7 @@ static void showMatrix( matrix_t *pMat )
         printf( "\n" );
     }
 }
+#endif  // SHOW_MATRIX
 
 //--------------------------------------------------------
 // createTranspose()
