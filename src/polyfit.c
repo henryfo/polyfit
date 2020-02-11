@@ -26,10 +26,12 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
-#include <stdio.h>      // printf()
-#include <stdlib.h>     // calloc()
 #include <math.h>       // pow()
 #include <stdbool.h>    // bool
+#include <stdio.h>      // printf()
+#include <stdlib.h>     // calloc()
+#include <string.h>     // strlen()
+
 #include "polyfit.h"
 
 // Define SHOW_MATRIX to display intermediate matrix values:
@@ -247,35 +249,51 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
 }
 
 //--------------------------------------------------------
-// showPoly()
-// Prints the coefficients of a polynomial.
+// polyToString()
+// Produces a string representation of a polynomial from
+// its coefficients.
+// Returns 0 on success.
 //--------------------------------------------------------
-//void showPoly( int coeffCount, double coeffArray[] )
-void showPoly( int coeffCount, double *coefficients )
+int polyToString( char *stringBuffer, size_t stringBufferSz, int coeffCount, double *coefficients )
 {
     bool isThisTheFirstTermShown = true;
+    if( (NULL == stringBuffer) || (NULL == coefficients) )
+    {
+        return -1;  // NULL pointer passed as a parameter
+    }
+        if( (0 == stringBufferSz) || (coeffCount <= 0) )
+    {
+        return -2;  // parameter out of range.
+    }
+
+    stringBuffer[0] = 0;
+
     for( int i = 0; i < coeffCount; i++)
     {
         int exponent = (coeffCount - 1) - i;
         bool isTermPrintable = (coefficients[i] != 0.0);
         if( isTermPrintable )
         {
+            int stringIndex = strlen( stringBuffer );           // Index of where to write the next term.
+            char *pNext = &(stringBuffer[ stringIndex ]);       // Pointer to where to write the next term.
+            int remainingSize = stringBufferSz - stringIndex;   // Space left in buffer.
+ 
             if( 0 == exponent )
             {
-                printf( "%s%f", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
+                snprintf( pNext, remainingSize, "%s%f", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
             else if( 1 == exponent)
             {
-                printf( "%s(%f * x)", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
+                snprintf( pNext, remainingSize, "%s(%f * x)", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
             else
             {
-                printf( "%s(%f * x^%d)", isThisTheFirstTermShown ? "" : " + ", coefficients[i], exponent );
+                snprintf( pNext, remainingSize, "%s(%f * x^%d)", isThisTheFirstTermShown ? "" : " + ", coefficients[i], exponent );
             }
             isThisTheFirstTermShown = false;
         }
     }
-    printf("\n");
+    return 0;
 }
 
 //=========================================================

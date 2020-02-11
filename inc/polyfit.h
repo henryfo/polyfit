@@ -40,18 +40,17 @@
 // Computes polynomial coefficients that best fit a set
 // of input points.
 //
-// The degree of the fitted polynomial is one less than
-// the count of coefficients in the coefficients array.
-//
 // Returns 0 if success.
 //--------------------------------------------------------
 int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults );
 
 //--------------------------------------------------------
-// showPoly()
-// Prints the coefficients of a polynomial.
+// polyToString()
+// Produces a string representation of a polynomial from
+// its coefficients.
+// Returns 0 on success.
 //--------------------------------------------------------
-void showPoly( int coeffCount, double *coefficients );
+int polyToString( char *stringBuffer, size_t stringBufferSz, int coeffCount, double *coefficients );
 
 
 

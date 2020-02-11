@@ -27,7 +27,12 @@
 //------------------------------------------------------------------------------------
 
 #include  <stdio.h>
+#include  <string.h>
 #include  "polyfit.h"
+
+// Buffer to hold a string representation of a polynomial:
+#define POLY_STRING_BF_SZ   (256)
+char polyStringBf[POLY_STRING_BF_SZ];
 
 // ---------------- TEST 1 DATA ------------------------
 // Create test data to find the closest line to (0,6), (1,0), and (2,0).
@@ -37,7 +42,7 @@ double y1[]   = { 6, 0, 0};
 int pc1       = (int) (sizeof(x1) / sizeof(x1[0]));           // pointCount
 double cr1[]  = {0, 0};                                       // coefficientResults
 int cc1       =  (int) (sizeof(cr1) / sizeof(cr1[0]));        // coefficientCount
-char *er1     = "-3x + 5";                                    // expected result
+char *er1     = "(-3.000000 * x) + 5.000000";                 // expected result
 
 // ---------------- TEST 2 DATA ------------------------
 // Create test data to find the closest parabola to the points shown.
@@ -47,7 +52,7 @@ double y2[]   = { 0, 0, 1, 0, 0};
 int pc2       = (int) (sizeof(x2) / sizeof(x2[0]));           // pointCount
 double cr2[]  = {0, 0, 0};                                    // coefficientResults
 int cc2       =  (int) (sizeof(cr2) / sizeof(cr2[0]));        // coefficientCount
-char *er2     = "(-10/70)(x^2) + (34/70)";                    // expected result
+char *er2     = "(-0.142857 * x^2) + 0.485714";               // expected result
 
 // ---------------- TEST 3 DATA ------------------------
 // Create a failure test case with impossible to solve data.
@@ -56,7 +61,7 @@ double y3[]   = { 0, 1, 1, 0};
 int pc3       = (int) (sizeof(x3) / sizeof(x3[0]));           // pointCount
 double cr3[]  = {0, 0, 0};                                    // coefficientResults
 int cc3       =  (int) (sizeof(cr3) / sizeof(cr3[0]));        // coefficientCount
-char *er3     = "this one should fail returning -4";          // expected result
+char *er3     = "error = -4";                                 // expected result
 
 // ---------------- TEST 4 DATA ------------------------
 // test MLS regeression example from https://www.mathsisfun.com/data/least-squares-regression.html
@@ -65,7 +70,7 @@ double y4[]   = { 4, 5, 7, 10, 15};
 int pc4       = (int) (sizeof(x4) / sizeof(x4[0]));           // pointCount
 double cr4[]  = {0, 0};                                       // coefficientResults
 int cc4       =  (int) (sizeof(cr4) / sizeof(cr4[0]));        // coefficientCount
-char *er4     = "(1.518 * x) + 0.305";                        // expected result
+char *er4     = "(1.518293 * x) + 0.304878";                  // expected result
 
 
 //--------------------------------------------------------
@@ -74,62 +79,104 @@ char *er4     = "(1.518 * x) + 0.305";                        // expected result
 //--------------------------------------------------------
 int main()
 {
-  int result;
+  int rVal;
+  int passedCount = 0;
+  int failedCount = 0;
 
   //---------------------TEST 1---------------------------
-  printf( "Test 1 expecting %s\n", er1);
-  printf( "Test 1 produced ");
-  result = polyfit( pc1, x1, y1, cc1, cr1);
-  if( 0 == result)
+  printf( "Test 1 expected %s\n", er1);
+  rVal = polyfit( pc1, x1, y1, cc1, cr1);
+  if( 0 == rVal)
   { 
-    showPoly( cc1, cr1 );
+    polyToString( polyStringBf, POLY_STRING_BF_SZ, cc1, cr1 );
   }
   else
   {
-    printf( "result = %d.\n", result );
+    snprintf( polyStringBf, POLY_STRING_BF_SZ, "error = %d", rVal );
   }
-  
+  printf( "Test 1 produced %s\n", polyStringBf);
+  if( 0 == strcmp( polyStringBf, er1) )
+  {
+    printf( "Test 1 passed OK.\n\n");
+    passedCount += 1;
+  }
+  else
+  {
+    printf( "Test failed.\n\n");
+    failedCount += 1;
+  }
+ 
   //---------------------TEST 2---------------------------
-  printf( "Test 2 expecting %s\n", er2);
-  printf( "Test 2 produced ");
-  result = polyfit( pc2, x2, y2, cc2, cr2);
-  if( 0 == result)
+  printf( "Test 2 expected %s\n", er2);
+  rVal = polyfit( pc2, x2, y2, cc2, cr2);
+  if( 0 == rVal)
   { 
-    showPoly( cc2, cr2 );
+    polyToString( polyStringBf, POLY_STRING_BF_SZ, cc2, cr2 );
   }
   else
   {
-    printf( "result = %d.\n", result );
+    snprintf( polyStringBf, POLY_STRING_BF_SZ, "error = %d", rVal );
+  }
+  printf( "Test 2 produced %s\n", polyStringBf);
+  if( 0 == strcmp( polyStringBf, er2) )
+  {
+    printf( "Test 2 passed OK.\n\n");
+    passedCount += 1;
+  }
+  else
+  {
+    printf( "Test failed.\n\n");
+    failedCount += 1;
   }
   
  //---------------------TEST 3---------------------------
-  printf( "Test 3 expecting %s\n", er3);
-  printf( "Test 3 produced ");
-  result = polyfit( pc3, x3, y3, cc3, cr3);
-  if( 0 == result)
+  printf( "Test 3 expected %s\n", er3);
+  rVal = polyfit( pc3, x3, y3, cc3, cr3);
+  if( 0 == rVal)
   { 
-    showPoly( cc3, cr3 );
+    polyToString( polyStringBf, POLY_STRING_BF_SZ, cc3, cr3 );
   }
   else
   {
-    printf( "result = %d.\n", result );
+    snprintf( polyStringBf, POLY_STRING_BF_SZ, "error = %d", rVal );
   }
-  
+  printf( "Test 3 produced %s\n", polyStringBf);
+  if( 0 == strcmp( polyStringBf, er3) )
+  {
+    printf( "Test 3 passed OK.\n\n");
+    passedCount += 1;
+  }
+  else
+  {
+    printf( "Test failed.\n\n");
+    failedCount += 1;
+  }
+ 
 //---------------------TEST 4---------------------------
-  printf( "Test 4 expecting %s\n", er4);
-  printf( "Test 4 produced ");
-  result = polyfit( pc4, x4, y4, cc4, cr4);
-  if( 0 == result)
+  printf( "Test 4 expected %s\n", er4);
+  rVal = polyfit( pc4, x4, y4, cc4, cr4);
+  if( 0 == rVal)
   { 
-    showPoly( cc4, cr4 );
+    polyToString( polyStringBf, POLY_STRING_BF_SZ, cc4, cr4 );
   }
   else
   {
-    printf( "result = %d.\n", result );
+    snprintf( polyStringBf, POLY_STRING_BF_SZ, "error = %d", rVal );
+  }
+  printf( "Test 4 produced %s\n", polyStringBf);
+  if( 0 == strcmp( polyStringBf, er4) )
+  {
+    printf( "Test 4 passed OK.\n\n");
+    passedCount += 1;
+  }
+  else
+  {
+    printf( "Test failed.\n\n");
+    failedCount += 1;
   }
   
-  
-  
-  return( 0 );
+//---------------------SUMMARY--------------------------- 
+  printf( "Tests complete: %d passed, %d failed.\n", passedCount, failedCount); 
+  return( -failedCount );
 }
 
