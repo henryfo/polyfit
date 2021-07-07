@@ -6,6 +6,7 @@
 // MIT License
 //
 // Copyright (c) 2020 Henry M. Forson
+// Copyright (c) 2021 Stephen P. Morgan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +27,11 @@
 // SOFTWARE.
 //------------------------------------------------------------------------------------
 
+#include <assert.h>
 #include <math.h>       // pow()
 #include <stdbool.h>    // bool
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>      // printf()
 #include <stdlib.h>     // calloc()
 #include <string.h>     // strlen()
@@ -280,20 +284,157 @@ int polyToString( char *stringBuffer, size_t stringBufferSz, int coeffCount, dou
  
             if( 0 == exponent )
             {
-                snprintf( pNext, remainingSize, "%s%f", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
+                snprintf( pNext, remainingSize, "%s%.12g", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
             else if( 1 == exponent)
             {
-                snprintf( pNext, remainingSize, "%s(%f * x)", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
+                snprintf( pNext, remainingSize, "%s(%.12g * x)", isThisTheFirstTermShown ? "" : " + ", coefficients[ i ] );
             }
             else
             {
-                snprintf( pNext, remainingSize, "%s(%f * x^%d)", isThisTheFirstTermShown ? "" : " + ", coefficients[i], exponent );
+                snprintf( pNext, remainingSize, "%s(%.12g * x^%d)", isThisTheFirstTermShown ? "" : " + ", coefficients[i], exponent );
             }
             isThisTheFirstTermShown = false;
         }
     }
     return 0;
+}
+
+//--------------------------------------------------------
+// polyMultiply()
+// Returns a value of x multiplied by itself n times, e.g.,
+// x^2 or x^3.
+//--------------------------------------------------------
+static inline double
+polyMultiply(double x, int n)
+{
+	if (n == 0) {
+		return 1.0;
+	}
+	else {
+		return x * polyMultiply(x, n - 1);
+	}
+}
+
+//--------------------------------------------------------
+// polyError()
+// Evaluates the error of a polynomial vs. the original
+// data used to regress the polynomial, at a point <x,y>.
+// Retiurns the error (squared) at that point.
+//--------------------------------------------------------
+double
+polyError(int pc, double* x, double* y, int cc, double* cr)
+{
+	double error = 0.0;
+
+	for (int n = 0; n < pc; n++) {
+		double x_val = x[n];
+		double y_val = y[n];
+
+		double y_est = 0.0;
+
+		for (int i = 0; i < cc; i++) {
+			y_est += polyMultiply(x_val, cc - i - 1) * *(cr + i);
+		}
+
+		double y_trm = y_est - y_val;
+
+		error += y_trm * y_trm;
+	}
+
+	return error;
+}
+
+//--------------------------------------------------------
+// polyEvaluate()
+// Evaluates a polynomial at x.
+// Returns the value of the polynomial at x.
+//--------------------------------------------------------
+double
+polyEvaluate(int cc, const double* cr, double x)
+{
+	double value = 0.0;
+
+	for (int i = 0; i < cc; i++) {
+		double coeff = *(cr + i);
+		value += coeff * polyMultiply(x, cc - i - 1);
+	}
+
+	return value;
+}
+
+
+//--------------------------------------------------------
+// polyRoot()
+//
+// Determins a real root of a given polynomial in the range
+// [x0..x1].  Iterates no more than *iteration times or until the
+// difference between values in the iteration is less than *epsilon.
+// Uses the secant iterative root-finding method.  If epsilon is
+// NULL, uses an epsilon valu eof 0.000001; otherwise, returns the
+// actual epsilon found.  If iterations is NULL, uses an iterations
+// value of 16; otherwise, returns the actual number of iterations.
+//
+// Returns the vaue of one real root in the range (if any). Note
+// that, if *epsilon or *iterations is hit, the value returned will
+// not be valid. Thus, those values should be checked on exit.
+// Call this function with epsilon and/or iterations set to NULL
+// at your own risk.
+//--------------------------------------------------------
+
+// Value to limit number of iterations in polyRoot.
+
+double
+polyRoot(int cc, const double* cr, double x0, double x1,
+		int* iterations, double* epsilon)
+{
+	double x0_init = x0;
+	double x1_init = x1;
+	double my_epsilon = (epsilon == NULL) ? 0.000001 : *epsilon;
+	int my_iterations = (iterations == NULL) ? 16 : *iterations;
+	int count;
+
+	double x2 = (x0 + x1) / 2.0;
+
+	for (int i = 0; i < my_iterations; i++) {
+		x2 = x1 - polyEvaluate(cc, cr, x1) * (x1 - x0) /
+					(polyEvaluate(cc, cr, x1) - polyEvaluate(cc, cr, x0));
+
+		x0 = x1;
+		x1 = x2;
+
+		if (x2 < x0_init || x2 > x1_init ||
+			fabs(x0 - x2) < my_epsilon || fabs(x1 - x2) < my_epsilon) {
+			count = i + 1;
+			break;
+		}
+	}
+
+	if (epsilon != NULL) {
+		*epsilon = fabs(x0 - x2) < fabs(x1 - x2) ?
+			fabs(x0 - x2) : fabs(x1 - x2);
+	}
+
+	if (iterations != NULL) {
+		*iterations = count;
+	}
+
+	return x2;
+}
+
+//--------------------------------------------------------
+// polyDerivative().
+// Computes the derivative of the given polynomial.
+// Returns the derivative polynomial in cr_out. The
+// derivative polynomial will have (cc - 1) terms.
+// Note that cr_out must be supplied by the caller.
+//--------------------------------------------------------
+void
+polyDerivative(int cc, const double* cr_in, double* cr_out)
+{
+	for (int i = 0; i < cc - 1; i++) {
+		*(cr_out + i) = *(cr_in + i) * (double)(cc - i - 1);
+	}
 }
 
 //=========================================================
