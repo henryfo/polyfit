@@ -106,7 +106,7 @@ static matrix_t *   createProduct( matrix_t *pLeft, matrix_t *pRight );
 //          -4 if unable to solve equations.
 //--------------------------------------------------------
 //int polyfit( int pointCount, point_t pointArray[],  int coeffCount, double coeffArray[] )
-int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults )
+int polyfit( int pointCount, const double *xValues, const double *yValues, int coefficientCount, double *coefficientResults )
 {
     int rVal = 0;
     int degree = coefficientCount - 1;
@@ -323,7 +323,7 @@ polyMultiply(double x, int n)
 // Retiurns the error (squared) at that point.
 //--------------------------------------------------------
 double
-polyError(int pc, double* x, double* y, int cc, double* cr)
+polyError(int pc, const double* x, const double* y, int cc, const double* cr)
 {
 	double error = 0.0;
 

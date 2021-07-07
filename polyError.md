@@ -8,7 +8,7 @@ Synopsis
 
 **#include "polyfit.h"**
 
-__double polyError(int__ _pointCount_, **double\*** _xValues_, **double\*** _yValues_,  __int__ _coefficientCount_, **double\*** _coefficients___);__
+__double polyError(int__ _pointCount_, **const double\*** _xValues_, **const double\*** _yValues_,  __int__ _coefficientCount_, **const double\*** _coefficients___);__
 
 Description
 ===========

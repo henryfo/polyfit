@@ -8,7 +8,7 @@ Synopsis
 
 **#include "polyfit.h"**
 
-__int polyfit(int__ _pointCount_, **double\*** _xValues_, **double\*** _yValues_,  __int__ _coefficientCount_, **double\*** _coefficientResults___);__
+__int polyfit(int__ _pointCount_, **const double\*** _xValues_, **const double\*** _yValues_,  __int__ _coefficientCount_, **double\*** _coefficientResults___);__
 
 Description
 ===========

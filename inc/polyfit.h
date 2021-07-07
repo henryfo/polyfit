@@ -42,7 +42,7 @@
 //
 // Returns 0 if success.
 //--------------------------------------------------------
-int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCount, double *coefficientResults );
+int polyfit(int pointCount, const double *xValues, const double *yValues, int coefficientCount, double *coefficientResults);
 
 //--------------------------------------------------------
 // polyToString()
@@ -50,11 +50,14 @@ int polyfit( int pointCount, double *xValues, double *yValues, int coefficientCo
 // its coefficients.
 // Returns 0 on success.
 //--------------------------------------------------------
-int polyToString( char *stringBuffer, size_t stringBufferSz, int coeffCount, double *coefficients );
+int polyToString(char *stringBuffer, size_t stringBufferSz, int coeffCount, double *coefficients);
 
 void polyDerivative(int cc, const double* cr_in, double* cr_out);
-double polyError(int pc, double* x, double* y, int cc, double* cr);
+
+double polyError(int pc, const double* x, const double* y, int cc, const double* cr);
+
 double polyEvaluate(int cc, const double* cr, double x);
+
 double polyRoot(int cc, const double* cr, double x0, double x1, int* iterations, double* epsilon);
 
 #endif	// POLYFIT_H
